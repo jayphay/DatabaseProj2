@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import uga.menik.csx370.models.ExpandedPost;
+import uga.menik.csx370.services.PeopleService;
+import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
 
 /**
@@ -26,6 +28,8 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping("/post")
 public class PostController {
+
+    
 
     /**
      * This function handles the /post/{postId} URL.
@@ -46,6 +50,7 @@ public class PostController {
 
         // Following line populates sample data.
         // You should replace it with actual data from the database.
+        
         List<ExpandedPost> posts = Utility.createSampleExpandedPostWithComments();
         mv.addObject("posts", posts);
 
