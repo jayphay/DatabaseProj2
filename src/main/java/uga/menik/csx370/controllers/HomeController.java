@@ -7,7 +7,15 @@ package uga.menik.csx370.controllers;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.sql.DataSource;
+
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import uga.menik.csx370.models.FollowableUser;
 import uga.menik.csx370.models.Post;
+import uga.menik.csx370.services.HomeService;
+import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
 
 /**
@@ -25,6 +36,14 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping
 public class HomeController {
+    // private final DataSource dataSource;
+    private UserService userService;
+    private HomeService homeService;
+
+    public HomeController(UserService userService, HomeService homeService) {
+        this.userService = userService;
+        this.homeService = homeService;
+    }
 
     /**
      * This is the specific function that handles the root URL itself.
@@ -38,16 +57,26 @@ public class HomeController {
         // See notes on ModelAndView in BookmarksController.java.
         ModelAndView mv = new ModelAndView("home_page");
 
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
-        mv.addObject("posts", posts);
+
+        // gets posts from users the logged in user follows and sort with newest at top
+        // also get the count of comments, likes
+        String loggedInUserId = userService.getLoggedInUser().getUserId();
+        try {
+            List<Post> posts = homeService.getFollowingPosts(loggedInUserId);
+            mv.addObject("posts", posts);
+        } catch (SQLException e) {
+            // Log the error or handle it appropriately
+            e.printStackTrace();
+            String message = "Failed to load users. Please try again.";
+            mv.addObject("errorMessage", message);
+        }
+        // mv.addObject("posts", posts);
 
         // If an error occured, you can set the following property with the
         // error message to show the error message to the user.
         // An error message can be optionally specified with a url query parameter too.
-        String errorMessage = error;
-        mv.addObject("errorMessage", errorMessage);
+        // String errorMessage = error;
+        // mv.addObject("errorMessage", errorMessage);
 
         // Enable the following line if you want to show no content message.
         // Do that if your content list is empty.

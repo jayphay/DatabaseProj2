@@ -20,7 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import uga.menik.csx370.models.FollowableUser;
-import uga.menik.csx370.utility.Utility;
+
 
 /**
  * This service contains people related functions.
@@ -43,7 +43,17 @@ public class PeopleService {
      */
     public List<FollowableUser> getFollowableUsers(String userIdToExclude) throws SQLException{
         // Write an SQL query to find the users that are not the current user.
-        final String sql = "select * from user where userId != ?";
+        final String sql = " select u.userId, u.firstName, u.lastName, max(p.createdDate) as lastPostTime" +
+        "from posts p, users u " +
+        "where u.userId != ? " +
+        "and u.userId = p.postId " +
+        "and u.userId not in " +
+        "(" +
+        "select followingId "+
+        "from follows "+
+        "where followerId = ? " +
+        "),"+
+        "group by u.userId, u.firstName, u.lastName ";
         List<FollowableUser> users = new ArrayList<>();
 
         // Run the query with a datasource.
@@ -64,14 +74,16 @@ public class PeopleService {
                         String userId = rs.getString("userId");
                         String firstName = rs.getString("firstName");
                         String lastName = rs.getString("lastName");
+                        String postTime = rs.getString("lastPostTime");
         
 
                         // add users to be returned
+                        
                         users.add(new FollowableUser(userId, 
                             firstName, 
-                            lastName, 
-                            false, 
-                            "Mar 07, 2024, 10:54 PM"));
+                            lastName,
+                        false,
+                            postTime));
                     }
                 }
             }
