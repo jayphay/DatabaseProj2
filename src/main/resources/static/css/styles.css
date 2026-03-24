@@ -21,7 +21,7 @@ body {
 nav {
     background: var(--box-color);
     padding: 16pt 0;
-    text-align: left;
+    text-align: center;
 }
 nav a {
     text-decoration: none;
@@ -44,7 +44,7 @@ nav a:hover {
     font-size: 12pt;
     color: var(--action-item-color);
     padding: 8pt 0;
-    text-align: left;
+    text-align: center;
 }
 .title-bar form {
     display: inline-block;
@@ -145,11 +145,11 @@ nav a:hover {
     display: flex;
     align-items: center;
 }
-.post-actions a, .post-actions button, 
+.post-actions a, .post-actions button,
 .post-actions .action-count {
     margin-right: 8pt;
     color: var(--action-item-color);
-    cursor: pointer;    
+    cursor: pointer;
     background: none;
     border: none;
     display: inline;
