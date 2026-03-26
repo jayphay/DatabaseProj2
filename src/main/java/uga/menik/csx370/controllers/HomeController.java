@@ -7,15 +7,8 @@ package uga.menik.csx370.controllers;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
-
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import uga.menik.csx370.models.FollowableUser;
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.services.HomeService;
+import uga.menik.csx370.services.PostService;
 import uga.menik.csx370.services.UserService;
-import uga.menik.csx370.utility.Utility;
 
 /**
  * This controller handles the home page and some of it's sub URLs.
@@ -39,10 +31,12 @@ public class HomeController {
     // private final DataSource dataSource;
     private UserService userService;
     private HomeService homeService;
+    private PostService postService;
 
-    public HomeController(UserService userService, HomeService homeService) {
+    public HomeController(UserService userService, HomeService homeService, PostService postService) {
         this.userService = userService;
         this.homeService = homeService;
+        this.postService = postService;
     }
 
     /**
@@ -97,8 +91,20 @@ public class HomeController {
     public String createPost(@RequestParam(name = "posttext") String postText) {
         System.out.println("User is creating post: " + postText);
 
-        // Redirect the user if the post creation is a success.
-        // return "redirect:/";
+        String trimmed = postText == null ? "" : postText.trim();
+        if (trimmed.isEmpty()) {
+            String message = URLEncoder.encode("Post content cannot be empty.",
+                    StandardCharsets.UTF_8);
+            return "redirect:/?error=" + message;
+        }
+
+        try {
+            String loggedInUserId = userService.getLoggedInUser().getUserId();
+            postService.createPost(loggedInUserId, trimmed);
+            return "redirect:/";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to create the post. Please try again.",

@@ -16,10 +16,8 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import uga.menik.csx370.models.FollowableUser;
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.models.User;
 
@@ -40,30 +38,42 @@ public class HomeService {
     }
 
     public List<Post> getFollowingPosts(String userIdToSearch) throws SQLException {
-        final String sql = "select p.postId, p.userId, p.content, p.createdDate, " +
-                "count(distinct c.commentId) as numComments, count(distinct l.userId) as numLikes, " +
-                "case when p.userId in (select l.userId from likes l where l.userId = ?) then 1 else 0 end as userLiked, " +
-                "case when p.userId in (select b.userId from bookmarks b where b.userId = ?) then 1 else 0 end as userBookmarked, " +
-                "u.firstName, u.lastName " +
-                "from posts p " +
-                "join user u on u.userId = p.userId " +
-                "left join comments c on c.postId = p.postId " +
-                "left join likes l on l.postId = p.postId " +
-                "where p.userId in ( " +
-                "select f.followingId " +
-                "from follows f " +
-                "where f.followerId = ? " +
-                ") " +
-                "group by p.postId, p.userId, p.content, p.createdDate " +
-                "order by p.createdDate desc";
+        final String sql = """
+                select
+                    p.postId,
+                    p.userId,
+                    p.content,
+                    p.createdDate,
+                    count(distinct c.commentId) as numComments,
+                    count(distinct l.userId) as numLikes,
+                    exists(select 1 from likes l2 where l2.userId = ? and l2.postId = p.postId) as userLiked,
+                    exists(select 1 from bookmarks b2 where b2.userId = ? and b2.postId = p.postId) as userBookmarked,
+                    u.firstName,
+                    u.lastName
+                from posts p
+                join user u on u.userId = p.userId
+                left join comments c on c.postId = p.postId
+                left join likes l on l.postId = p.postId
+                where
+                    p.userId = ?
+                    or p.userId in (
+                        select f.followingId
+                        from follows f
+                        where f.followerId = ?
+                    )
+                group by p.postId, p.userId, p.content, p.createdDate, u.firstName, u.lastName
+                order by p.createdDate desc
+                """;
         List<Post> posts = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             // Following line replaces the first place holder with username.
-            pstmt.setString(1, userIdToSearch);
-            pstmt.setString(2, userIdToSearch);
-            pstmt.setString(3, userIdToSearch);
+            int uid = Integer.parseInt(userIdToSearch);
+            pstmt.setInt(1, uid);
+            pstmt.setInt(2, uid);
+            pstmt.setInt(3, uid);
+            pstmt.setInt(4, uid);
 
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -80,8 +90,8 @@ public class HomeService {
                     String createdDate = rs.getString("createdDate");
                     int numComments = rs.getInt("numComments");
                     int numLikes = rs.getInt("numLikes");
-                    int userLiked = rs.getInt("userLiked");
-                    int userBookmarked = rs.getInt("userBookmarked");
+                    boolean userLiked = rs.getBoolean("userLiked");
+                    boolean userBookmarked = rs.getBoolean("userBookmarked");
                     
                     posts.add(new Post(postId, 
                         content, 
@@ -89,8 +99,8 @@ public class HomeService {
                         new User(userId, firstName, lastName),
                         numLikes,
                         numComments, 
-                        userLiked == 1 ? true : false,
-                        userBookmarked == 1 ? true : false));
+                        userLiked,
+                        userBookmarked));
                     // add posts to be returned
                 }
             }

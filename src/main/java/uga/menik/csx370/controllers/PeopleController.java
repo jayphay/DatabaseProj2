@@ -21,7 +21,6 @@ import org.springframework.web.servlet.ModelAndView;
 import uga.menik.csx370.models.FollowableUser;
 import uga.menik.csx370.services.PeopleService;
 import uga.menik.csx370.services.UserService;
-import uga.menik.csx370.utility.Utility;
 
 /**
  * Handles /people URL and its sub URL paths.
@@ -98,8 +97,17 @@ public class PeopleController {
         System.out.println("\tuserId: " + userId);
         System.out.println("\tisFollow: " + isFollow);
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/people";
+        try {
+            String followerId = userService.getLoggedInUser().getUserId();
+            if (isFollow) {
+                peopleService.follow(followerId, userId);
+            } else {
+                peopleService.unfollow(followerId, userId);
+            }
+            return "redirect:/people";
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to (un)follow the user. Please try again.",
