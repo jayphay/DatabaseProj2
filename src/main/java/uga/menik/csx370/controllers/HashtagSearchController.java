@@ -7,6 +7,7 @@ package uga.menik.csx370.controllers;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import uga.menik.csx370.models.Post;
-import uga.menik.csx370.utility.Utility;
+import uga.menik.csx370.services.PostService;
+import uga.menik.csx370.services.UserService;
 
 /**
  * Handles /hashtagsearch URL and possibly others.
@@ -23,6 +25,15 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping("/hashtagsearch")
 public class HashtagSearchController {
+
+    private final PostService postService;
+    private final UserService userService;
+
+    @Autowired
+    public HashtagSearchController(PostService postService, UserService userService) {
+        this.postService = postService;
+        this.userService = userService;
+    }
 
     /**
      * This function handles the /hashtagsearch URL itself.
@@ -38,10 +49,17 @@ public class HashtagSearchController {
         // See notes on ModelAndView in BookmarksController.java.
         ModelAndView mv = new ModelAndView("posts_page");
 
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
-        mv.addObject("posts", posts);
+        try {
+            String viewerId = userService.getLoggedInUser().getUserId();
+            List<Post> posts = postService.searchPostsByHashtags(hashtags, viewerId);
+            mv.addObject("posts", posts);
+            if (posts.isEmpty()) {
+                mv.addObject("isNoContent", true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mv.addObject("errorMessage", "Search failed. Please try again.");
+        }
 
         // If an error occured, you can set the following property with the
         // error message to show the error message to the user.
@@ -50,7 +68,6 @@ public class HashtagSearchController {
 
         // Enable the following line if you want to show no content message.
         // Do that if your content list is empty.
-        // mv.addObject("isNoContent", true);
         
         return mv;
     }

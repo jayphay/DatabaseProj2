@@ -1,15 +1,19 @@
 package uga.menik.csx370.controllers;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import uga.menik.csx370.models.Post;
-import uga.menik.csx370.utility.Utility;
+import uga.menik.csx370.models.FollowableUser;
+import uga.menik.csx370.services.PeopleService;
+import uga.menik.csx370.services.UserService;
 
 /**
  * Handles /usersearch URL and possibly others.
@@ -18,6 +22,15 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping("/usersearch")
 public class UserSearchController {
+
+    private final PeopleService peopleService;
+    private final UserService userService;
+
+    @Autowired
+    public UserSearchController(PeopleService peopleService, UserService userService) {
+        this.peopleService = peopleService;
+        this.userService = userService;
+    }
 
     /**
      * This function handles the /usersearch URL itself.
@@ -28,23 +41,19 @@ public class UserSearchController {
     public ModelAndView webpage(@RequestParam(name = "users") String users) {
         System.out.println("User is searching: " + users);
 
-        // See notes on ModelAndView in BookmarksController.java.
-        ModelAndView mv = new ModelAndView("posts_page");
-
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
-        mv.addObject("posts", posts);
-
-        // If an error occured, you can set the following property with the
-        // error message to show the error message to the user.
-        // String errorMessage = "Some error occured!";
-        // mv.addObject("errorMessage", errorMessage);
-
-        // Enable the following line if you want to show no content message.
-        // Do that if your content list is empty.
-        // mv.addObject("isNoContent", true);
-
+        ModelAndView mv = new ModelAndView("people_page");
+        try {
+            String loggedInUserId = userService.getLoggedInUser().getUserId();
+            List<FollowableUser> found = peopleService.searchUsers(users, loggedInUserId);
+            mv.addObject("users", found);
+            if (found.isEmpty()) {
+                mv.addObject("isNoContent", true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            String message = URLEncoder.encode("Failed to search users. Please try again.", StandardCharsets.UTF_8);
+            mv.addObject("errorMessage", message);
+        }
         return mv;
     }
 
