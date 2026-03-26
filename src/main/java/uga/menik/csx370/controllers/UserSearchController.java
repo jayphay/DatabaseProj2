@@ -12,7 +12,7 @@ import uga.menik.csx370.models.Post;
 import uga.menik.csx370.utility.Utility;
 
 /**
- * Handles /hashtagsearch URL and possibly others.
+ * Handles /usersearch URL and possibly others.
  * At this point no other URLs.
  */
 @Controller
@@ -20,11 +20,9 @@ import uga.menik.csx370.utility.Utility;
 public class UserSearchController {
 
     /**
-     * This function handles the /hashtagsearch URL itself.
-     * This URL can process a request parameter with name hashtags.
+     * This function handles the /usersearch URL itself.
+     * This URL can process a request parameter with name users.
      * In the browser the URL will look something like below:
-     * http://localhost:8081/hashtagsearch?hashtags=%23amazing+%23fireworks
-     * Note: the value of the hashtags is URL encoded.
      */
     @GetMapping
     public ModelAndView webpage(@RequestParam(name = "users") String users) {

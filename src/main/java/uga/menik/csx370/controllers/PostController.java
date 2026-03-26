@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import uga.menik.csx370.models.ExpandedPost;
+import uga.menik.csx370.models.User;
 import uga.menik.csx370.services.PeopleService;
 import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
@@ -120,17 +121,23 @@ public class PostController {
     @GetMapping("/{postId}/bookmark/{isAdd}")
     public String addOrRemoveBookmark(@PathVariable("postId") String postId,
             @PathVariable("isAdd") Boolean isAdd) {
-        System.out.println("The user is attempting add or remove a bookmark:");
-        System.out.println("\tpostId: " + postId);
-        System.out.println("\tisAdd: " + isAdd);
+
+        try {
+            System.out.println("The user is attempting add or remove a bookmark:");
+            System.out.println("\tpostId: " + postId);
+            System.out.println("\tisAdd: " + isAdd);
+
+            return "redirect:/post/" + postId;
+        } catch (Exception e) {
+            String message = URLEncoder.encode("Failed to (un)bookmark the post. Please try again.",
+                    StandardCharsets.UTF_8);
+            return "redirect:/post/" + postId + "?error=" + message;
+        }
 
         // Redirect the user if the comment adding is a success.
         // return "redirect:/post/" + postId;
 
         // Redirect the user with an error message if there was an error.
-        String message = URLEncoder.encode("Failed to (un)bookmark the post. Please try again.",
-                StandardCharsets.UTF_8);
-        return "redirect:/post/" + postId + "?error=" + message;
     }
 
 }
