@@ -150,7 +150,7 @@ public class PostService {
         StringBuilder where = new StringBuilder();
         for (int i = 0; i < tags.size(); i++) {
             if (i > 0) {
-                where.append(" or ");
+                where.append(" and ");
             }
             where.append("p.content like ?");
         }

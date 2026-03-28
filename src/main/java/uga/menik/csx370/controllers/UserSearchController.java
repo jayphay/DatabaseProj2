@@ -41,7 +41,7 @@ public class UserSearchController {
     public ModelAndView webpage(@RequestParam(name = "users") String users) {
         System.out.println("User is searching: " + users);
 
-        ModelAndView mv = new ModelAndView("people_page");
+        ModelAndView mv = new ModelAndView("user_page");
         try {
             String loggedInUserId = userService.getLoggedInUser().getUserId();
             List<FollowableUser> found = peopleService.searchUsers(users, loggedInUserId);

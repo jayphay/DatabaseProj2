@@ -42,7 +42,7 @@ public class PeopleController {
     }
     /**
      * Serves the /people web page.
-     * 
+     *
      * Note that this accepts a URL parameter called error.
      * The value to this parameter can be shown to the user as an error message.
      * See notes in HashtagSearchController.java regarding URL parameters.
@@ -62,9 +62,7 @@ public class PeopleController {
             mv.addObject("users", followableUsers);
         } catch (SQLException e) {
             // Log the error or handle it appropriately
-            e.printStackTrace();
-            String message = "Failed to load users. Please try again.";
-            mv.addObject("errorMessage", message);
+            mv.addObject("errorMessage", e.getMessage());
         }
 
         // If an error occured, you can set the following property with the
@@ -76,14 +74,14 @@ public class PeopleController {
         // Enable the following line if you want to show no content message.
         // Do that if your content list is empty.
         // mv.addObject("isNoContent", true);
-        
+
         return mv;
     }
 
     /**
      * This function handles user follow and unfollow.
      * Note the URL has parameters defined as variables ie: {userId} and {isFollow}.
-     * Follow and unfollow is handled by submitting a get type form to this URL 
+     * Follow and unfollow is handled by submitting a get type form to this URL
      * by specifing the userId and the isFollow variables.
      * Learn more here: https://www.w3schools.com/tags/att_form_method.asp
      * An example URL that is handled by this function looks like below:
