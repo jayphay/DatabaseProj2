@@ -9,16 +9,15 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import uga.menik.csx370.models.ExpandedPost;
 import uga.menik.csx370.models.User;
+import uga.menik.csx370.services.BookmarkService;
 import uga.menik.csx370.services.PeopleService;
 import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
@@ -29,8 +28,13 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping("/post")
 public class PostController {
+    @Autowired
+    private UserService userService;
 
-    
+    @Autowired
+    private BookmarkService bookmarkService;
+
+
 
     /**
      * This function handles the /post/{postId} URL.
@@ -119,25 +123,31 @@ public class PostController {
      * get type form submissions.
      */
     @GetMapping("/{postId}/bookmark/{isAdd}")
-    public String addOrRemoveBookmark(@PathVariable("postId") String postId,
-            @PathVariable("isAdd") Boolean isAdd) {
-
+    @ResponseBody
+    public ResponseEntity<Void> addOrRemoveBookmark(@PathVariable("postId") int postId,
+                                                    @PathVariable("isAdd") boolean isAdd) {
         try {
-            System.out.println("The user is attempting add or remove a bookmark:");
-            System.out.println("\tpostId: " + postId);
-            System.out.println("\tisAdd: " + isAdd);
+            // 1. Manually get the userId or use a fixed ID for testing
+            // Example: If you still want the current user but don't want to "check" auth
+            User currentUser = userService.getLoggedInUser();
 
-            return "redirect:/post/" + postId;
+            // If no one is logged in, you can default to a 'Guest' ID (e.g., 1)
+            int userId = (currentUser != null) ? Integer.parseInt(currentUser.getUserId()) : 1;
+
+            // 2. Perform the database action
+            if (isAdd) {
+                bookmarkService.addBookmark(userId, postId);
+            } else {
+                bookmarkService.removeBookmark(userId, postId);
+            }
+
+            // 3. Return 200 OK to the AJAX script
+            return ResponseEntity.ok().build();
+
         } catch (Exception e) {
-            String message = URLEncoder.encode("Failed to (un)bookmark the post. Please try again.",
-                    StandardCharsets.UTF_8);
-            return "redirect:/post/" + postId + "?error=" + message;
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
-
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/post/" + postId;
-
-        // Redirect the user with an error message if there was an error.
     }
 
 }

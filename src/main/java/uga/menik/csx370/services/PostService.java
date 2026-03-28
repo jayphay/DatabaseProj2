@@ -39,6 +39,51 @@ public class PostService {
         }
     }
 
+    public List<Post> getBookmarkedPosts(String userId) throws SQLException {
+        final String sql = """
+            select
+                p.postId, 
+                p.content, 
+                p.createdDate,
+                u.userId, 
+                u.firstName, 
+                u.lastName,
+                (select count(*) from comments c where c.postId = p.postId) as numComments,
+                (select count(*) from likes l where l.postId = p.postId) as numLikes,
+                exists(select 1 from likes l where l.userId = ? and l.postId = p.postId) as viewerLiked,
+                true as viewerBookmarked -- Since we are in the Bookmarks tab, these are all true
+            from posts p
+            join bookmarks b on p.postId = b.postId
+            join user u on u.userId = p.userId
+            where b.userId = ?
+            order by p.createdDate desc
+            """;
+
+        List<Post> posts = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int uId = Integer.parseInt(userId);
+            pstmt.setInt(1, uId);
+            pstmt.setInt(2, uId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    posts.add(new Post(
+                            rs.getString("postId"),
+                            rs.getString("content"),
+                            rs.getString("createdDate"),
+                            new User(rs.getString("userId"), rs.getString("firstName"), rs.getString("lastName")),
+                            rs.getInt("numLikes"),
+                            rs.getInt("numComments"),
+                            rs.getBoolean("viewerLiked"),
+                            rs.getBoolean("viewerBookmarked")
+                    ));
+                }
+            }
+        }
+        return posts;
+    }
+
     public List<Post> getPostsByUser(String userIdToView, String viewerUserId) throws SQLException {
         final String sql = """
                 select

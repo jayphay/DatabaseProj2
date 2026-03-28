@@ -5,14 +5,20 @@ This is a project developed by Dr. Menik to give the students an opportunity to 
 */
 package uga.menik.csx370.controllers;
 
+import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import uga.menik.csx370.models.Post;
+import uga.menik.csx370.models.User;
+import uga.menik.csx370.services.BookmarkService;
+import uga.menik.csx370.services.PostService;
+import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
 
 /**
@@ -25,30 +31,37 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping("/bookmarks")
 public class BookmarksController {
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private PostService postService;
 
     /**
      * /bookmarks URL itself is handled by this.
      */
     @GetMapping
     public ModelAndView webpage() {
-        // posts_page is a mustache template from src/main/resources/templates.
-        // ModelAndView class enables initializing one and populating placeholders
-        // in the template using Java objects assigned to named properties.
         ModelAndView mv = new ModelAndView("posts_page");
 
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
-        mv.addObject("posts", posts);
+        // Get the current logged-in user
+        User currentUser = userService.getLoggedInUser();
+        if (currentUser == null) {
+            return new ModelAndView("redirect:/login");
+        }
 
-        // If an error occured, you can set the following property with the
-        // error message to show the error message to the user.
-        // String errorMessage = "Some error occured!";
-        // mv.addObject("errorMessage", errorMessage);
+        try {
+            // Fetch real data from the database
+            List<Post> posts = postService.getBookmarkedPosts(currentUser.getUserId());
+            mv.addObject("posts", posts);
 
-        // Enable the following line if you want to show no content message.
-        // Do that if your content list is empty.
-        // mv.addObject("isNoContent", true);
+            // Show "no content" message if list is empty
+            if (posts.isEmpty()) {
+                mv.addObject("isNoContent", true);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mv.addObject("errorMessage", "Failed to load bookmarks.");
+        }
 
         return mv;
     }
