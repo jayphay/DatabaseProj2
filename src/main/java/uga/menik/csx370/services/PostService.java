@@ -35,6 +35,7 @@ public class PostService {
     }
 
     public void createPost(String userId, String content) throws SQLException {
+        // It is accessed by http://localhost:8081
         final String sql = "insert into posts (userId, content) values (?, ?)";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
