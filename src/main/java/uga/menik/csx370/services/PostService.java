@@ -21,6 +21,7 @@ import uga.menik.csx370.models.Post;
 import uga.menik.csx370.models.User;
 import uga.menik.csx370.models.Comment;
 import uga.menik.csx370.models.ExpandedPost;
+import uga.menik.csx370.utility.Utility;
 
 
 
@@ -76,16 +77,16 @@ public class PostService {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    posts.add(new Post(
+                        posts.add(new Post(
                             rs.getString("postId"),
                             rs.getString("content"),
-                            rs.getString("createdDate"),
+                            Utility.formatDisplayDate(rs.getString("createdDate")),
                             new User(rs.getString("userId"), rs.getString("firstName"), rs.getString("lastName")),
                             rs.getInt("numLikes"),
                             rs.getInt("numComments"),
                             rs.getBoolean("viewerLiked"),
                             rs.getBoolean("viewerBookmarked")
-                    ));
+                        ));
                 }
             }
         }
@@ -138,10 +139,10 @@ public class PostService {
                     boolean viewerLiked = rs.getBoolean("viewerLiked");
                     boolean viewerBookmarked = rs.getBoolean("viewerBookmarked");
 
-                    posts.add(new Post(
+                        posts.add(new Post(
                             postId,
                             content,
-                            createdDate,
+                            Utility.formatDisplayDate(createdDate),
                             new User(postUserId, firstName, lastName),
                             numLikes,
                             numComments,
@@ -218,10 +219,10 @@ public class PostService {
                     boolean viewerLiked = rs.getBoolean("viewerLiked");
                     boolean viewerBookmarked = rs.getBoolean("viewerBookmarked");
 
-                    posts.add(new Post(
+                        posts.add(new Post(
                             postId,
                             content,
-                            createdDate,
+                            Utility.formatDisplayDate(createdDate),
                             new User(postUserId, firstName, lastName),
                             numLikes,
                             numComments,
@@ -318,7 +319,7 @@ public class PostService {
                     String lastName = rs.getString("lastName");
                     String postId = rs.getString("postId");
                     String content = rs.getString("content");
-                    String createdDate = rs.getString("createdDate");
+                    String createdDate = Utility.formatDisplayDate(rs.getString("createdDate"));
                     int numComments = rs.getInt("numComments");
                     int numLikes = rs.getInt("numLikes");
                     boolean userLiked = rs.getBoolean("isLiked");
@@ -330,7 +331,7 @@ public class PostService {
                             String userId1 = rs1.getString("userId");
                             String postId1 = rs1.getString("postId");
                             String content1 = rs1.getString("content");
-                            String createdDate1 = rs1.getString("createdDate");
+                            String createdDate1 = Utility.formatDisplayDate(rs1.getString("createdDate"));
                             String firstName1 = rs1.getString("firstName");
                             String lastName1 = rs1.getString("lastName");
 

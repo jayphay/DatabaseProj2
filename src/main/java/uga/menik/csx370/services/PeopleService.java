@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uga.menik.csx370.models.FollowableUser;
+import uga.menik.csx370.utility.Utility;
 
 
 /**
@@ -78,9 +79,10 @@ public class PeopleService {
                         String postTime = rs.getString("lastPostTime");
                         if (postTime == null) {
                             postTime = "No posts yet";
+                        } else {
+                            postTime = Utility.formatDisplayDate(postTime);
                         }
                         boolean isFollowed = rs.getBoolean("isFollowed");
-        
 
                         users.add(new FollowableUser(
                             userId, 
@@ -147,6 +149,11 @@ public class PeopleService {
                     String firstName = rs.getString("firstName");
                     String lastName = rs.getString("lastName");
                     String postTime = rs.getString("lastPostTime");
+                    if (postTime == null) {
+                        postTime = "No posts yet";
+                    } else {
+                        postTime = Utility.formatDisplayDate(postTime);
+                    }
                     boolean isFollowed = rs.getBoolean("isFollowed");
 
                     users.add(new FollowableUser(userId, firstName, lastName, isFollowed, postTime));

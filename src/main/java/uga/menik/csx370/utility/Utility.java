@@ -11,16 +11,47 @@ import uga.menik.csx370.models.User;
 
 public class Utility {
 
+    // Format: Mar 07, 2026, 10:54 PM
+    private static final java.time.format.DateTimeFormatter DISPLAY_DATE_FORMATTER =
+            java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy, hh:mm a");
+
+    /**
+     * Formats a java.sql.Timestamp or ISO string to the display format.
+     * Accepts either a java.sql.Timestamp, java.util.Date, or ISO string.
+     */
+    public static String formatDisplayDate(Object dateObj) {
+        if (dateObj == null) return "";
+        java.time.LocalDateTime ldt = null;
+        if (dateObj instanceof java.sql.Timestamp) {
+            ldt = ((java.sql.Timestamp) dateObj).toLocalDateTime();
+        } else if (dateObj instanceof java.util.Date) {
+            ldt = ((java.util.Date) dateObj).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        } else if (dateObj instanceof String) {
+            String s = (String) dateObj;
+            try {
+                ldt = java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } catch (Exception e) {
+                try {
+                    ldt = java.time.LocalDateTime.parse(s, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                } catch (Exception ex) {
+                    return s; // fallback: return as-is
+                }
+            }
+        }
+        if (ldt == null) return dateObj.toString();
+        return ldt.format(DISPLAY_DATE_FORMATTER);
+    }
+
     public static List<FollowableUser> createSampleFollowableUserList() {
         List<FollowableUser> followableUsers = new ArrayList<>();
         followableUsers.add(new FollowableUser("1", "John", "Smith",
-                true, "Mar 07, 2024, 10:54 PM"));
+            true, formatDisplayDate("2024-03-07 22:54:00")));
         followableUsers.add(new FollowableUser("2", "Josh", "Did",
-                false, "Mar 05, 2024, 11:00 AM"));
+            false, formatDisplayDate("2024-03-05 11:00:00")));
         followableUsers.add(new FollowableUser("3", "Milk", "Man",
-                true, "Mar 06, 2024, 09:30 AM"));
+            true, formatDisplayDate("2024-03-06 09:30:00")));
         followableUsers.add(new FollowableUser("4", "Bob", "Yellow",
-                false, "Mar 02, 2024, 08:15 PM"));
+            false, formatDisplayDate("2024-03-02 20:15:00")));
         return followableUsers;
     }
 
@@ -32,11 +63,11 @@ public class Utility {
         User user5 = new User("5", "Charlie", "Green");
         List<Post> postsWithoutComments = new ArrayList<>();
         postsWithoutComments.add(new Post("1", "Exploring Spring Boot features",
-                "Mar 07, 2024, 10:54 PM", user1, 10, 4, false, false));
+            formatDisplayDate("2024-03-07 22:54:00"), user1, 10, 4, false, false));
         postsWithoutComments.add(new Post("2", "Introduction to Microservices",
-                "Mar 08, 2024, 11:00 AM", user2, 15, 6, true, true));
+            formatDisplayDate("2024-03-08 11:00:00"), user2, 15, 6, true, true));
         postsWithoutComments.add(new Post("3", "Basics of Reactive Programming",
-                "Mar 09, 2024, 09:30 AM", user3, 20, 3, true, false));
+            formatDisplayDate("2024-03-09 09:30:00"), user3, 20, 3, true, false));
         return postsWithoutComments;
     }
 
@@ -49,13 +80,13 @@ public class Utility {
         List<Comment> commentsForPost = new ArrayList<>();
 
         commentsForPost.add(new Comment("1", "Great insights, thanks for sharing!", 
-            "Mar 07, 2024, 10:54 PM", user2));
+            formatDisplayDate("2024-03-07 22:54:00"), user2));
         commentsForPost.add(new Comment("2", "I'm looking forward to trying this out.", 
-            "Mar 08, 2024, 11:00 AM", user4));
+            formatDisplayDate("2024-03-08 11:00:00"), user4));
         commentsForPost.add(new Comment("3", "Can you provide more examples in your next post?", 
-            "Mar 09, 2024, 09:30 AM", user5));
+            formatDisplayDate("2024-03-09 09:30:00"), user5));
         ExpandedPost postWithComments = new ExpandedPost("4", "Advanced Techniques " + 
-            "in Spring Security", "Mar 10, 2024, 08:15 PM", user1, 25, 
+            "in Spring Security", formatDisplayDate("2024-03-10 20:15:00"), user1, 25, 
             commentsForPost.size(), false, true, commentsForPost);
         return List.of(postWithComments);
     }

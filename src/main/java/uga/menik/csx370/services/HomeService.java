@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.models.User;
+import uga.menik.csx370.utility.Utility;
 
 
 /**
@@ -91,7 +92,7 @@ public class HomeService {
                     String lastName = rs.getString("lastName");
                     String postId = rs.getString("postId");
                     String content = rs.getString("content");
-                    String createdDate = rs.getString("createdDate");
+                    String createdDate = Utility.formatDisplayDate(rs.getString("createdDate"));
                     int numComments = rs.getInt("numComments");
                     int numLikes = rs.getInt("numLikes");
                     boolean userLiked = rs.getBoolean("userLiked");
