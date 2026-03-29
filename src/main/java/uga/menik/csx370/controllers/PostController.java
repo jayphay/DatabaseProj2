@@ -89,7 +89,7 @@ public class PostController {
      * See comments in HomeController.java regarding form submissions.
      */
     @PostMapping("/{postId}/comment")
-    public String postComment(@PathVariable("postId") String postId,
+    public String postComment(@PathVariable("postId") int postId,
             @RequestParam(name = "comment") String comment) {
         System.out.println("The user is attempting add a comment:");
         System.out.println("\tpostId: " + postId);
@@ -97,11 +97,24 @@ public class PostController {
 
         // Redirect the user if the comment adding is a success.
         // return "redirect:/post/" + postId;
+        
+        try {
+            User currentUser = userService.getLoggedInUser();
 
-        // Redirect the user with an error message if there was an error.
-        String message = URLEncoder.encode("Failed to post the comment. Please try again.",
-                StandardCharsets.UTF_8);
-        return "redirect:/post/" + postId + "?error=" + message;
+            int userId = Integer.parseInt(currentUser.getUserId());
+
+            postService.addComment(userId, postId, comment);
+
+            // Redirect the user if the comment successfully added.
+            return "redirect:/post/" + postId ;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Redirect the user with an error message if there was an error.
+            String message = URLEncoder.encode("Failed to post the comment. Please try again.",
+                    StandardCharsets.UTF_8);
+            return "redirect:/post/" + postId + "?error=" + message;
+        }        
     }
 
     /**

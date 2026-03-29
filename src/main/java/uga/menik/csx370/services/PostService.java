@@ -270,6 +270,7 @@ public class PostService {
                 left join posts p on c.postId = p.postId
                 left join user u on c.userId = u.userId
                 where p.postId = ?
+                order by c.createdDate asc
                 """;
 
         List<Comment> comments = new ArrayList<>();
@@ -337,6 +338,17 @@ public class PostService {
             }
         }
         return expPost;
+    }
+
+    public void addComment(int userId, int postId, String comment) throws SQLException {
+        final String sql = "insert into comments (userId, postId, content) values (?, ?, ?)";
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, postId);
+            pstmt.setString(3, comment);
+            pstmt.executeUpdate();
+        }
     }
 }
 
