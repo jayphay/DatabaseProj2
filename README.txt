@@ -8,7 +8,9 @@ diagram and created GitHub repository to allow for easier collaboration.
 
 James Shanks:
 Shresta Jha:
-Grant Moore:
+
+Grant Moore: Worked on the comment functionality, added comments to all of the SQL Queries,
+made the final video. Tweaked the like funcationality to make it live update. Added data as SQL Insertion statements.
 
 New Feature: User search is a search bar in addition to the hashtag search bar which
 allows for the individual to search up everyone that contains the inputted sequence in their username
