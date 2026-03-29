@@ -8,6 +8,7 @@ package uga.menik.csx370.controllers;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import org.springframework.web.servlet.ModelAndView;
 import uga.menik.csx370.models.ExpandedPost;
 import uga.menik.csx370.models.User;
 import uga.menik.csx370.services.BookmarkService;
+import uga.menik.csx370.services.PostService;
+import uga.menik.csx370.services.LikeService;
 import uga.menik.csx370.services.PeopleService;
 import uga.menik.csx370.services.UserService;
 import uga.menik.csx370.utility.Utility;
@@ -34,6 +37,11 @@ public class PostController {
     @Autowired
     private BookmarkService bookmarkService;
 
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private PostService postService;
 
 
     /**
@@ -56,14 +64,16 @@ public class PostController {
         // Following line populates sample data.
         // You should replace it with actual data from the database.
         
-        List<ExpandedPost> posts = Utility.createSampleExpandedPostWithComments();
-        mv.addObject("posts", posts);
-
-        // If an error occured, you can set the following property with the
-        // error message to show the error message to the user.
-        // An error message can be optionally specified with a url query parameter too.
-        String errorMessage = error;
-        mv.addObject("errorMessage", errorMessage);
+        String loggedInUserId = userService.getLoggedInUser().getUserId();
+        try {
+            ExpandedPost post = postService.getExpandedPost(loggedInUserId, postId);
+            mv.addObject("posts", List.of(post));
+        } catch (SQLException e) {
+            // Log the error or handle it appropriately
+            e.printStackTrace();
+            String message = "Failed to load users. Please try again.";
+            mv.addObject("errorMessage", message);
+        }
 
         // Enable the following line if you want to show no content message.
         // Do that if your content list is empty.
@@ -101,19 +111,30 @@ public class PostController {
      * get type form submissions and how path variables work.
      */
     @GetMapping("/{postId}/heart/{isAdd}")
-    public String addOrRemoveHeart(@PathVariable("postId") String postId,
+    public ResponseEntity<Void> addOrRemoveHeart(@PathVariable("postId") int postId,
             @PathVariable("isAdd") Boolean isAdd) {
-        System.out.println("The user is attempting add or remove a heart:");
-        System.out.println("\tpostId: " + postId);
-        System.out.println("\tisAdd: " + isAdd);
+        try {
+            // 1. Manually get the userId or use a fixed ID for testing
+            // Example: If you still want the current user but don't want to "check" auth
+            User currentUser = userService.getLoggedInUser();
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/post/" + postId;
+            // If no one is logged in, you can default to a 'Guest' ID (e.g., 1)
+            int userId = (currentUser != null) ? Integer.parseInt(currentUser.getUserId()) : 1;
 
-        // Redirect the user with an error message if there was an error.
-        String message = URLEncoder.encode("Failed to (un)like the post. Please try again.",
-                StandardCharsets.UTF_8);
-        return "redirect:/post/" + postId + "?error=" + message;
+            // 2. Perform the database action
+            if (isAdd) {
+                likeService.addLike(userId, postId);
+            } else {
+                likeService.removeLike(userId, postId);
+            }
+
+            // 3. Return 200 OK to the AJAX script
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
 
     /**

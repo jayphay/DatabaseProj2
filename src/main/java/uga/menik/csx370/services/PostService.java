@@ -19,6 +19,10 @@ import org.springframework.stereotype.Service;
 
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.models.User;
+import uga.menik.csx370.models.Comment;
+import uga.menik.csx370.models.ExpandedPost;
+
+
 
 @Service
 public class PostService {
@@ -238,6 +242,101 @@ public class PostService {
             tags.add(tag);
         }
         return tags;
+    }
+
+    public ExpandedPost getExpandedPost(String userIdToSearch, String postIdToFind) throws SQLException {
+        final String postInfoSQL = """
+                select
+                    p.postId,
+                    p.userId,
+                    p.content,
+                    p.createdDate,
+                    count(distinct c.commentId) as numComments,
+                    count(distinct l.userId) as numLikes,
+                    exists(select 1 from likes l2 where l2.userId = ? and l2.postId = p.postId) as isLiked,
+                    exists(select 1 from bookmarks b2 where b2.userId = ? and b2.postId = p.postId) as isBookmarked,
+                    u.firstName,
+                    u.lastName
+                from posts p
+                join user u on u.userId = p.userId
+                left join comments c on c.postId = p.postId
+                left join likes l on l.postId = p.postId
+                where p.postId = ?
+                """;
+
+        final String commentsSQL = """
+                select c.commentId, c.postId, c.userId, c.content, c.createdDate, u.firstName, u.lastname
+                from comments c
+                left join posts p on c.postId = p.postId
+                left join user u on c.userId = u.userId
+                where p.postId = ?
+                """;
+
+        List<Comment> comments = new ArrayList<>();
+        ExpandedPost expPost = new ExpandedPost("", "", "", new User("", "", ""), 0, 0, false, false, comments);
+        try (Connection conn = dataSource.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(postInfoSQL);
+            PreparedStatement pstmt1 = conn.prepareStatement(commentsSQL)) {
+
+            // Following line replaces the first place holder with username.
+            int uid = Integer.parseInt(userIdToSearch);
+            int pid = Integer.parseInt(postIdToFind);
+            pstmt.setInt(1, uid);
+            pstmt.setInt(2, uid);
+            pstmt.setInt(3, pid);
+            pstmt1.setInt(1, pid);
+
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                // Traverse the result rows one at a time.
+                // Note: This specific while loop will only run at most once 
+                // since username is unique.
+                while (rs.next()) {
+
+                    String userId = rs.getString("userId");
+                    String firstName = rs.getString("firstName");
+                    String lastName = rs.getString("lastName");
+                    String postId = rs.getString("postId");
+                    String content = rs.getString("content");
+                    String createdDate = rs.getString("createdDate");
+                    int numComments = rs.getInt("numComments");
+                    int numLikes = rs.getInt("numLikes");
+                    boolean userLiked = rs.getBoolean("isLiked");
+                    boolean userBookmarked = rs.getBoolean("isBookmarked");
+
+                    try (ResultSet rs1 = pstmt1.executeQuery()){
+                        while (rs1.next()) {
+                            String commentId1 = rs1.getString("commentId");
+                            String userId1 = rs1.getString("userId");
+                            String postId1 = rs1.getString("postId");
+                            String content1 = rs1.getString("content");
+                            String createdDate1 = rs1.getString("createdDate");
+                            String firstName1 = rs1.getString("firstName");
+                            String lastName1 = rs1.getString("lastName");
+
+                            Comment newComment = new Comment(postId1, 
+                            content1, 
+                            createdDate1,
+                            new User(userId1, firstName1, lastName1));
+
+                            comments.add(newComment);
+                        }
+
+                    }
+                    
+                    expPost = new ExpandedPost(postId, 
+                        content, 
+                        createdDate, 
+                        new User(userId, firstName, lastName),
+                        numLikes,
+                        numComments, 
+                        userLiked,
+                        userBookmarked, 
+                        comments);
+                }
+            }
+        }
+        return expPost;
     }
 }
 

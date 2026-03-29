@@ -3,7 +3,9 @@ ugrd 18
 Shachin Chakraborty: Created Bookmarkibility and implemented the bookmark Page.
 Implemented hashtag search feature, and created user search UI and implemented it.
 
-Jack Phalen:
+Jack Phalen: Created likability, home page, expanded post page. Also made the entity 
+diagram and created GitHub repository to allow for easier collaboration.
+
 James Shanks:
 Shresta Jha:
 Grant Moore:
