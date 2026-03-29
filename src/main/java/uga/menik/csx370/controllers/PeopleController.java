@@ -52,6 +52,11 @@ public class PeopleController {
         // See notes on ModelAndView in BookmarksController.java.
         ModelAndView mv = new ModelAndView("people_page");
 
+
+        if (userService.getLoggedInUser() == null) {
+            mv.addObject("errorMessage", "No logged in user found.");
+            return mv;
+        }
         // Following line populates sample data.
         // You should replace it with actual data from the database.
         // Use the PeopleService instance to find followable users.
@@ -62,14 +67,16 @@ public class PeopleController {
             mv.addObject("users", followableUsers);
         } catch (SQLException e) {
             // Log the error or handle it appropriately
+            e.printStackTrace();
             mv.addObject("errorMessage", e.getMessage());
         }
 
         // If an error occured, you can set the following property with the
         // error message to show the error message to the user.
         // An error message can be optionally specified with a url query parameter too.
-        String errorMessage = error;
-        mv.addObject("errorMessage", errorMessage);
+        if (error != null) {
+            mv.addObject("errorMessage", error);
+        }
 
         // Enable the following line if you want to show no content message.
         // Do that if your content list is empty.

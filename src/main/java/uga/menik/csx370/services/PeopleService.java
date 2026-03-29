@@ -63,9 +63,8 @@ public class PeopleService {
         try (Connection conn = dataSource.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            int uid = Integer.parseInt(userIdToExclude);
-            pstmt.setInt(1, uid);
-            pstmt.setInt(2, uid);
+            pstmt.setString(1, userIdToExclude);
+            pstmt.setString(2, userIdToExclude);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -74,14 +73,19 @@ public class PeopleService {
                         String firstName = rs.getString("firstName");
                         String lastName = rs.getString("lastName");
                         String postTime = rs.getString("lastPostTime");
+                        if (postTime == null) {
+                            postTime = "No posts yet";
+                        }
                         boolean isFollowed = rs.getBoolean("isFollowed");
         
 
-                        users.add(new FollowableUser(userId, 
+                        users.add(new FollowableUser(
+                            userId, 
                             firstName, 
                             lastName,
                             isFollowed,
-                            postTime));
+                            postTime
+                        ));
                     }
                 }
             }
