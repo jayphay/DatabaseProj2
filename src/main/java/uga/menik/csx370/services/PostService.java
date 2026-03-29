@@ -44,6 +44,10 @@ public class PostService {
     }
 
     public List<Post> getBookmarkedPosts(String userId) throws SQLException {
+        // This SQL query retrieves all posts that are bookmarked by the user with the given userId.
+        // It joins the posts, bookmarks, and user tables to get the necessary information about the posts and their authors.
+        // The query also includes subqueries to count the number of comments and likes for each post, and to check if the viewer has liked or bookmarked each post.
+        // It is accessed by http://localhost:8081/bookmarks
         final String sql = """
             select
                 p.postId, 
@@ -89,6 +93,10 @@ public class PostService {
     }
 
     public List<Post> getPostsByUser(String userIdToView, String viewerUserId) throws SQLException {
+        // This SQL query retrieves all posts made by a specific user (identified by userIdToView)
+        // and includes information about whether the viewer (identified by viewerUserId) has liked or bookmarked each post. 
+        // It also counts the number of comments and likes for each post. The results are ordered by the creation date of the posts in descending order.
+        // It is accessed by http://localhost:8081/user/{userIdToView}
         final String sql = """
                 select
                     p.postId,
@@ -159,6 +167,11 @@ public class PostService {
             where.append("p.content like ?");
         }
 
+        // This query retrieves posts that contain specific hashtags in their content. 
+        // It uses a dynamic WHERE clause to filter posts based on the provided hashtags. 
+        // The query also includes subqueries to count the number of comments and likes for each post, and to check if the viewer has liked or bookmarked each post. 
+        // The results are ordered by the creation date of the posts in descending order.
+        // It is accessed by http://localhost:8081/hashtagsearch?hashtags={hashtagquery}
         final String sql = """
                 select
                     p.postId,
@@ -245,6 +258,10 @@ public class PostService {
     }
 
     public ExpandedPost getExpandedPost(String userIdToSearch, String postIdToFind) throws SQLException {
+        // This SQL query retrieves detailed information about a specific post (identified by postIdToFind) for a specific user (identified by userIdToSearch).
+        // It joins the posts, user, comments, and likes tables to get the necessary information about the post, its author, and its interactions. 
+        // The query also includes subqueries to count the number of comments and likes for the post, and to check if the viewer has liked or bookmarked the post. 
+        // It is accessed by http://localhost:8081/post/{postIdToFind}
         final String postInfoSQL = """
                 select
                     p.postId,
@@ -264,6 +281,8 @@ public class PostService {
                 where p.postId = ?
                 """;
 
+        // This SQL query retrieves all comments for a specific post (identified by postIdToFind) along with the commenter's information.
+        // It is also accessed by http://localhost:8081/post/{postIdToFind}
         final String commentsSQL = """
                 select c.commentId, c.postId, c.userId, c.content, c.createdDate, u.firstName, u.lastname
                 from comments c
@@ -341,6 +360,8 @@ public class PostService {
     }
 
     public void addComment(int userId, int postId, String comment) throws SQLException {
+        // This SQL query inserts a new comment into the comments table with the provided userId, postId, and comment content.
+        // It is accessed by http://localhost:8081/post/{postId}/comment via a POST request.
         final String sql = "insert into comments (userId, postId, content) values (?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {

@@ -38,6 +38,10 @@ public class HomeService {
     }
 
     public List<Post> getFollowingPosts(String userIdToSearch) throws SQLException {
+        // This is a SQL query to retrieve posts from the user with userIdToSearch and the users they follow,
+        // along with the post's author information, number of comments, number of likes, and whether the logged-in user has liked or bookmarked the post.
+        // Note the ? marks in the query. They are placeholders that we will later replace.
+        // It is accessed by http://localhost:8081/ when the home page is loaded
         final String sql = """
                 select
                     p.postId,

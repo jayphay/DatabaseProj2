@@ -24,6 +24,9 @@ public class BookmarkService {
      * Adds a bookmark for a user on a specific post.
      */
     public void addBookmark(int userId, int postId) throws SQLException {
+        // The query uses INSERT IGNORE to prevent duplicate bookmarks from the same user on the same post.
+        // It adds the bookmark to the database for the given userId and postId.
+        // It is accessed by the home (http://localhost:8081/) page and the profile page (http://localhost:8081/profile/{userId}) when the bookmark button is clicked
         final String sql = "INSERT IGNORE INTO bookmarks (userId, postId) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
@@ -40,6 +43,8 @@ public class BookmarkService {
 
     public void removeBookmark(int userId, int postId) throws SQLException {
         // The query remains a DELETE regardless of ID types
+        // It removes the bookmark from the database for the given userId and postId.
+        // It is accessed by the home (http://localhost:8081/) page and the profile page (http://localhost:8081/profile/{userId}) when the unbookmark button is clicked
         final String sql = "DELETE FROM bookmarks WHERE userId = ? AND postId = ?";
 
         try (Connection conn = dataSource.getConnection();

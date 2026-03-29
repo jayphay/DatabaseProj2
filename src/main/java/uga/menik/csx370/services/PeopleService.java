@@ -41,6 +41,9 @@ public class PeopleService {
      * with id userIdToExclude.
      */
     public List<FollowableUser> getFollowableUsers(String userIdToExclude) throws SQLException{
+        // This is a SQL query to retrieve all users except the one with userIdToExclude, along with their last post time and whether they are followed by the user with userIdToExclude.
+        // Note the ? marks in the query. They are placeholders that we will later replace.
+        // It is accessed by http://localhost:8081/people 
         final String sql = """
                 select
                     u.userId,
@@ -98,7 +101,10 @@ public class PeopleService {
         if (q.isEmpty()) {
             return getFollowableUsers(loggedInUserId);
         }
-
+        
+        // This is a SQL query to search for users whose username, first name, last name, or full name matches the search query, along with their last post time and whether they are followed by the logged-in user.
+        // Note the ? marks in the query. They are placeholders that we will later replace.
+        // It is accessed by http://localhost:8081/usersearch?users={query} 
         final String sql = """
                 select
                     u.userId,
@@ -151,6 +157,9 @@ public class PeopleService {
     }
 
     public void follow(String followerId, String followingId) throws SQLException {
+        // This is a SQL statement to insert a new follow relationship into the database, ignoring if it already exists.
+        // Note the ? marks in the SQL statement. They are placeholders that we will later replace
+        // It is accessed by the http://localhost:8081/people page, and the http://localhost:8081/usersearch?users={query} page
         final String sql = "insert ignore into follows (followerId, followingId) values (?, ?)";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -161,6 +170,9 @@ public class PeopleService {
     }
 
     public void unfollow(String followerId, String followingId) throws SQLException {
+        // This is a SQL statement to delete a follow relationship from the database.
+        // Note the ? marks in the SQL statement. They are placeholders that we will later replace
+        // It is accessed by the http://localhost:8081/people page, and the http://localhost:8081/usersearch?users={query} page
         final String sql = "delete from follows where followerId = ? and followingId = ?";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {

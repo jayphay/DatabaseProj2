@@ -53,7 +53,9 @@ public class UserService {
      * Returns true if authentication is succesful. False otherwise.
      */
     public boolean authenticate(String username, String password) throws SQLException {
+        // This is a SQL query to retrieve the user with the given username.
         // Note the ? mark in the query. It is a place holder that we will later replace.
+        // It is accessed by http://localhost:8081/login via POST request with username and password in the body.
         final String sql = "select * from user where username = ?";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -114,7 +116,9 @@ public class UserService {
      */
     public boolean registerUser(String username, String password, String firstName, String lastName)
             throws SQLException {
+        // This is a SQL statement to insert a new user into the database.
         // Note the ? marks in the SQL statement. They are placeholders like mentioned above.
+        // It is accessed by http://localhost:8081/register via POST request with username, password, firstName and lastName in the body.`
         final String registerSql = "insert into user (username, password, firstName, lastName) values (?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();

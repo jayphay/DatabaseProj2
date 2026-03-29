@@ -24,6 +24,8 @@ public class LikeService {
      * Adds a like for a user on a specific post.
      */
     public void addLike(int userId, int postId) throws SQLException {
+        // The query uses INSERT IGNORE to prevent duplicate likes from the same user on the same post.
+        // It is accessed by the home (http://localhost:8081/) page and the profile page (http://localhost:8081/profile/{userId}) when the like button is clicked.
         final String sql = "INSERT IGNORE INTO likes (userId, postId) VALUES (?, ?)";
 
         try (Connection conn = dataSource.getConnection();
@@ -40,6 +42,8 @@ public class LikeService {
 
     public void removeLike(int userId, int postId) throws SQLException {
         // The query remains a DELETE regardless of ID types
+        // It removes the like from the database for the given userId and postId.
+        // It is accessed by the home (http://localhost:8081/) page and the profile page (http://localhost:8081/profile/{userId}) when the unlike button is clicked.
         final String sql = "DELETE FROM likes WHERE userId = ? AND postId = ?";
 
         try (Connection conn = dataSource.getConnection();
