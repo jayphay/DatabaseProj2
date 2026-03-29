@@ -6,7 +6,9 @@ Implemented hashtag search feature, and created user search UI and implemented i
 Jack Phalen: Created likability, home page, expanded post page. Also made the entity 
 diagram and created GitHub repository to allow for easier collaboration.
 
-James Shanks:
+James Shanks: Cleaned up the 'follow/unfollow' functionality. Fixed a bug that caused
+the whole people page to throw errors. Assisted Grant Moore. 
+
 Shresta Jha:
 
 Grant Moore: Worked on the comment functionality, added comments to all of the SQL Queries,
