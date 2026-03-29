@@ -23,7 +23,6 @@ public class FollowableUser extends User {
         this.lastActiveDate = (lastActiveDate != null) ? lastActiveDate : "Never";
     }
 
-    // Constructor 2 (without image)
     public FollowableUser(String userId, String firstName, String lastName,
                           boolean isFollowed, String lastActiveDate) {
         super(userId, firstName, lastName);
