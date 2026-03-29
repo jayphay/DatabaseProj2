@@ -10,10 +10,26 @@ package uga.menik.csx370.models;
  * indicating whether the current session user follows this user.
  */
 public class FollowableUser extends User {
+    /**
+     * Flag indicating whether the user is followed by the current session user.
+     */
     private final boolean isFollowed;
+    /**
+     * This is the date and time that this user has last made a post.
+     */
     private final String lastActiveDate;
 
-    // Constructor 1 (with image)
+    /**
+     * Constructs a FollowableUser with specified details and follow status.
+     *
+     * @param userId           the unique identifier of the user
+     * @param firstName        the first name of the user
+     * @param lastName         the last name of the user
+     * @param profileImageName the name of the profile image file for the user
+     * @param isFollowed       the follow status of the user by the current session
+     *                         user
+     * @param lastActiveDate   the date and time that this user has last made a post.
+     */
     public FollowableUser(String userId, String firstName, String lastName, String profileImageName,
                           boolean isFollowed, String lastActiveDate) {
         super(userId, firstName, lastName, profileImageName);
@@ -23,6 +39,16 @@ public class FollowableUser extends User {
         this.lastActiveDate = (lastActiveDate != null) ? lastActiveDate : "Never";
     }
 
+    /**
+     * Constructs a FollowableUser with specified details and follow status.
+     *
+     * @param userId           the unique identifier of the user
+     * @param firstName        the first name of the user
+     * @param lastName         the last name of the user
+     * @param isFollowed       the follow status of the user by the current session
+     *                         user
+     * @param lastActiveDate   the date and time that this user has last made a post.
+     */
     public FollowableUser(String userId, String firstName, String lastName,
                           boolean isFollowed, String lastActiveDate) {
         super(userId, firstName, lastName);
